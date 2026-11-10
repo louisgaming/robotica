@@ -1,8 +1,12 @@
-Competição Rover — pacote das equipes
+# Competição Rover — pacote das equipes
 
 Este pacote mostra o que o robô e a ground station (GS) da equipe precisam fazer para funcionar com o dashboard da competição. As regras de interface estão em CONTRATO-EQUIPES.md; leia primeiro as seções 3 (MQTT) e 4 (vídeo).
 
- ROBÔ (Raspberry Pi) ──vídeo H.264 UDP:5000──► GROUND STATION (notebook) ──Retransmitir (WHIP)──► SERVIDOR 192.168.3.2
+---
+
+## Fluxograma
+
+ROBÔ (Raspberry Pi) ──vídeo H.264 UDP:5000──► GROUND STATION (notebook) ──Retransmitir (WHIP)──► SERVIDOR 192.168.3.2
    │  ▲                                              │                                            (dashboard, juízes)
    │  └──── comandos rover/<id>/cmd/* ◄──── broker MQTT 192.168.3.2:1883 ◄──── comandos da GS
    └──── telemetria rover/<id>/{status,state,mode,battery,detection} ────────────►
@@ -16,14 +20,16 @@ referencia/gs-sem-tela/	Alternativas sem interface: gs_relay.py (repassa o víde
 
 As referências são opcionais: a equipe pode fazer a sua GS e o seu software de robô. O contrato é obrigatório.
 
-Passo a passo
+## Passo a passo
 
 1. Credenciais. Pegue o cartão da sua equipe (cartoes/roverNN.md). O ID vale para MQTT e vídeo, e a equipe só pode publicar em rover/<seu id>/….
 
 2. Ground station (notebook Windows, PowerShell como administrador):
 
-cd C:\rover-gs                      (cópia de referencia\rover-gs)
+```bash
+cd C:\rover-gs                      
 .\instalar.bat --servidor 192.168.3.2 --id roverNN --senha SUA_SENHA
+```
 
 Ela abre em http://127.0.0.1:8070. O ⚙ mostra o IP desta GS, que é o que o robô usa para mandar o vídeo. Para testar sem robô: C:\RoverGS\simular_robo.bat ou camera_robo.bat (webcam do notebook), depois Retransmitir, e conferir em http://192.168.3.2:8080/arena.html?path=rover/roverNN.
 
