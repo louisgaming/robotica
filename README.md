@@ -24,7 +24,7 @@ referencia/gs-sem-tela/	Alternativas sem interface: gs_relay.py (repassa o víde
 
 ### 1. Credenciais
 Pegue o cartão da sua equipe em `cartoes/roverNN.md`. O ID vale para MQTT e vídeo.
-Prefixo para os tópicos de publicação: `rover/{id_equipe}/...`.
+Prefixo para os tópicos de publicação: `rover/<id_equipe>/...`.
 
 > Exemplos: `rover/4/telemetry`, `rover/4/tool_movement_commands`
 
@@ -89,20 +89,47 @@ O que o dashboard e o juiz esperam (contrato §3.1)
 
 `rover/<id_equipe>/state`: IDLE, BUSCA, NAVEGACAO, BUSCA_ARTEFATO, ARTEFATO_ENCONTRADO ou COLETA. O alerta de autonomia do juiz depende disso. Reporte com fidelidade.
 
-rover/<id_equipe>/mode: MANUAL ou AUTONOMO. Pilotar em MANUAL durante NAVEGACAO ou BUSCA_ARTEFATO gera penalidade de tempo.
+`rover/<id_equipe>/mode`: MANUAL ou AUTONOMO. Pilotar em MANUAL durante NAVEGACAO ou BUSCA_ARTEFATO gera penalidade de tempo.
 
-rover/<id>/battery: tensão, % e corrente reais. A referência simula esses valores.
+`rover/<id_equipe>/battery`: tensão, % e corrente reais. A referência simula esses valores.
 
-rover/<id>/detection: uma mensagem por identificação YOLO (artifact ∈ hiperboloide, argola_pequena, argola_grande, cilindro, exotico).
+`rover/<id_equipe>/detection`: uma mensagem por identificação YOLO (artifact ∈ hiperboloide, argola_pequena, argola_grande, cilindro, exotico).
 
-6. Vídeo dentro do padrão (contrato §4.1): H.264 baseline, sem B-frames, 1 fatia, keyframe a cada 1 s, 640×480, ≤ 1500 kbps. O robo_video.py já gera assim.
+### 6. Vídeo 
+Padrão (contrato §4.1): H.264 baseline, sem B-frames, 1 fatia, keyframe a cada 1 s, 640×480, ≤ 1500 kbps. O robo_video.py já gera assim.
 
-7. Homologação com o juiz antes da prova: checklist no contrato §6.
+### 7. 
+Homologação com o juiz antes da prova: checklist no contrato §6.
 
+---
+
+## Troubleshooting
 Dicas do que já deu errado nos testes
-Webcam USB barata só tem YUYV. O robo_video.py detecta sozinho; para forçar, use --formato yuyv422.
-Imagem preta: outro programa está usando a câmera (app Câmera, Teams, OBS, Animaze).
-Wi-Fi do Pi com taxa baixa: sudo iw dev wlan0 set power_save off. O configurar_pi.sh já deixa assim.
-Pi na bateria: confira vcgencmd get_throttled. Se o último dígito não for 0, há subtensão agora. Alimente o Pi separado dos motores.
-A porta 5000 da GS aceita uma origem de vídeo por vez: não rode o simulador junto com o robô.
-scp de pasta precisa de -r.
+
+- **Webcam**
+   Webcam USB barata só tem YUYV. O robo_video.py detecta sozinho; para forçar, use --formato yuyv422.
+
+- **Imagem preta**
+   Outro programa está usando a câmera (app Câmera, Teams, OBS, Animaze).
+
+- **Wi-Fi do Pi com taxa baixa**
+   Rode:
+   ```bash
+   sudo iw dev wlan0 set power_save off
+   ```
+   > `configurar_pi.sh` já deixa assim.
+
+- **Raspberry Pi alimentado pela bateria**
+   Confira, no terminal do Rasberry Pi:
+   ```bash
+   vcgencmd get_throttled
+   ```
+   Se o último dígito não for 0, há subtensão. Alimente o Pi separado dos motores. Peça ajuda para não fazer besteira.
+
+- **Porta 5000 da GS**
+   A porta aceita uma origem de vídeo por vez, não rode o simulador junto com o robô.
+   O comando `scp` do terminal requer o parâmetro `-r` quando feito em um diretório.
+   > Exemplo:
+   > ```bash
+   > scp -r referencia\robo-pi usuario@IP_DO_PI:~/rover-pi
+   > ```
