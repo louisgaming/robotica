@@ -88,8 +88,11 @@ No mesmo arquivo, troque a bateria simulada (telemetry_loop) pela leitura real e
 O que o dashboard e o juiz esperam (contrato §3.1)
 
 `rover/<id_equipe>/state`: IDLE, BUSCA, NAVEGACAO, BUSCA_ARTEFATO, ARTEFATO_ENCONTRADO ou COLETA. O alerta de autonomia do juiz depende disso. Reporte com fidelidade.
+
 rover/<id_equipe>/mode: MANUAL ou AUTONOMO. Pilotar em MANUAL durante NAVEGACAO ou BUSCA_ARTEFATO gera penalidade de tempo.
+
 rover/<id>/battery: tensão, % e corrente reais. A referência simula esses valores.
+
 rover/<id>/detection: uma mensagem por identificação YOLO (artifact ∈ hiperboloide, argola_pequena, argola_grande, cilindro, exotico).
 
 6. Vídeo dentro do padrão (contrato §4.1): H.264 baseline, sem B-frames, 1 fatia, keyframe a cada 1 s, 640×480, ≤ 1500 kbps. O robo_video.py já gera assim.
