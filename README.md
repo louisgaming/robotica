@@ -22,11 +22,14 @@ referencia/gs-sem-tela/	Alternativas sem interface: gs_relay.py (repassa o víde
 
 ## Passo a passo
 
-### 1. Credenciais.
-Pegue o cartão da sua equipe (cartoes/roverNN.md). O ID vale para MQTT e vídeo, e a equipe só pode publicar em rover/<seu id>/….
+### 1. Credenciais
+Pegue o cartão da sua equipe em `cartoes/roverNN.md`. O ID vale para MQTT e vídeo.
+Prefixo para os tópicos de publicação: `rover/{id_equipe}/...`.
+
+> Exemplos: `rover/4/telemetry`, `rover/4/tool_movement_commands`
 
 ### 2. Ground station 
-No Windows, execute o PowerShell como administrador:
+No Windows, execute o PowerShell como administrador
 
 ```bash
 cd C:\rover-gs                      
@@ -34,13 +37,15 @@ cd C:\rover-gs
 ```
 
 A Ground Station é acessada em http://127.0.0.1:8070. O ⚙ mostra o IP desta GS, que é o que o robô usa para mandar o vídeo. 
-Para testar sem robô, rode: `C:\RoverGS\simular_robo.bat` 
-ou 
-`C:\RoverGS\camera_robo.bat` | webcam do PC
-, depois Retransmitir, e conferir em http://192.168.3.2:8080/arena.html?path=rover/roverNN.
+
+> **Testar sem robô**: rode 
+> `C:\RoverGS\simular_robo.bat` 
+> ou 
+> `C:\RoverGS\camera_robo.bat` (usa a webcam do PC)
+> depois, **Retransmitir**. Confira em http://192.168.3.2:8080/arena.html?path=rover/roverNN
 
 ### 3. Robô
-(Raspberry Pi, internet na primeira vez):
+(Raspberry Pi, internet na primeira vez)
 
 ```bash
 scp -r referencia\robo-pi usuario@IP_DO_PI:~/rover-pi
@@ -51,29 +56,39 @@ sudo bash configurar_pi.sh
 journalctl -u rover -f              
 ```
 
-### 4. Ligue o seu hardware.
+### 4. Ligue o seu hardware
 O robo_agente.py hoje só registra os comandos (LogDriver). Troque por uma classe com os mesmos quatro métodos:
 
-python
+```python
 class MeuDriver:
-    moving = False                             # o homem-morto lê isto: True enquanto os motores giram
-    def drive(self, linear, angular): ...     # -1..1 cada; converter para PWM/velocidade; atualize self.moving
-    def stop(self, motivo): ...                # parar motores e self.moving = False (chamado pelo homem-morto)
-    def arm(self, juntas, preset): ...         # lista de ângulos em graus
-    def gripper(self, acao): ...               # "open" | "close"
+    moving = False                             # 
+    def drive(self, linear, angular): ...      # 
+    def stop(self, motivo): ...                # 
+    def arm(self, juntas, preset): ...         # 
+    def gripper(self, acao): ...               # 
+```
+
+| Nome | Tipo | Default / Parâmetros | Descrição |
+|---|---|---|---|
+| `moving` | Atributo | False | Lido pelo homem-morto: True enquanto os motores giram |
+| `drive()` | Método | `linear`, `angular` | ambos os parâmetros recebem valores entre -1 e 1; converter para PWM/velocidade; atualize self.moving |
+| `stop()` | Método | `motivo` | para motores e define self.moving = False (chamado pelo homem-morto) |
+| `arm()` | Método | `juntas`, `preset` | lista de ângulos em graus |
+| `gripper()` | Método | `acao` | Recebe "open" e "close" |
 
 O agente já cuida de três coisas:
 
-homem-morto: para se ficar 0,5 s sem comando ou se perder o broker;
-confirmação do modo;
-status online/offline.
+1. homem-morto: para se ficar 0,5 s sem comando ou se perder o broker
+2. confirmação do modo
+3. status online/offline
 
 No mesmo arquivo, troque a bateria simulada (telemetry_loop) pela leitura real e publique os estados reais. Ajuste o braço da GS (nomes, limites e posições prontas) em C:\RoverGS\config\gs.json → manipulador.
 
-5. Publique o que o dashboard e o juiz esperam (contrato §3.1):
+### 5. Publicação 
+O que o dashboard e o juiz esperam (contrato §3.1)
 
-rover/<id>/state: IDLE, BUSCA, NAVEGACAO, BUSCA_ARTEFATO, ARTEFATO_ENCONTRADO ou COLETA. O alerta de autonomia do juiz depende disso. Reporte com fidelidade.
-rover/<id>/mode: MANUAL ou AUTONOMO. Pilotar em MANUAL durante NAVEGACAO ou BUSCA_ARTEFATO gera penalidade de tempo.
+`rover/<id_equipe>/state`: IDLE, BUSCA, NAVEGACAO, BUSCA_ARTEFATO, ARTEFATO_ENCONTRADO ou COLETA. O alerta de autonomia do juiz depende disso. Reporte com fidelidade.
+rover/<id_equipe>/mode: MANUAL ou AUTONOMO. Pilotar em MANUAL durante NAVEGACAO ou BUSCA_ARTEFATO gera penalidade de tempo.
 rover/<id>/battery: tensão, % e corrente reais. A referência simula esses valores.
 rover/<id>/detection: uma mensagem por identificação YOLO (artifact ∈ hiperboloide, argola_pequena, argola_grande, cilindro, exotico).
 
